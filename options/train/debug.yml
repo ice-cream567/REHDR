@@ -1,0 +1,135 @@
+# general settings
+name: REHDR_DEBUG #EFNet_experiment debug
+model_type: ImageEventRestorationModel
+scale: 1
+num_gpu: 1 #4
+manual_seed: 10
+
+
+datasets:
+  train:
+    name: RealHDR-train
+    type: SeqImgDataset
+    #dataroot_gt:
+    #dataroot_lr:
+    #dataroot_ev:
+    dataroot: D:\pycode\REHDR\dataset\RealHDR\val
+
+    # keep true if use events
+    norm_voxel: true
+    return_voxel: true  #return_voxel=True, return_ldr=True, return_hdr=True, norm_voxel=True
+
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+
+    max_dataset_size: !!float inf
+    crop_size: 64
+    use_flip: true
+    use_rot: true
+
+
+    # data loader settings
+
+    use_shuffle: true
+    num_worker_per_gpu: 1   #3->4
+    batch_size_per_gpu: 2 # 4 for 2080, 8 for titan  4->1
+    dataset_enlarge_ratio: 1  # accelarate, equals to the num_gpu
+    prefetch_mode: cpu
+    num_prefetch_queue: 2
+    time_step: 2
+  val:
+    name: RealHDR-test
+    type: SeqImgDataset #TestDataset
+    dataroot: D:\pycode\REHDR\dataset\RealHDR\val
+    norm_voxel: true
+    return_voxel: true
+
+    io_backend:
+      type: disk
+
+    max_dataset_size: !!float inf
+    crop_size: ~
+    use_flip: false
+    use_rot: false
+
+    time_step: 1
+
+dataset_name: RealHDR
+
+# network structures
+network_g:
+  type: REHDR #EFNet
+  img_chn: 3
+  ev_chn: 5
+  num_encoders: 3
+  num_residual_blocks: 2 # num_block of resblock in the bottleneck of unet
+  base_num_channels: 32
+  norm: BN
+  recurrent_block_type: convlstm
+  use_upsample_conv: False
+
+
+# path
+path:
+  pretrain_network_g: ~
+  strict_load_g: true
+  resume_state: ~
+  training_states: ~ # save current trainig model states, for resume
+
+# training settings
+train:
+  optim_g:
+    type: AdamW
+    lr: !!float 2e-4
+    weight_decay: !!float 1e-4
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: TrueCosineAnnealingLR
+    T_max: 100000
+    eta_min: !!float 1e-7
+
+  total_iter: 100000
+  warmup_iter: -1 # no warm up
+
+  # losses
+  loss:
+    type: l1+perc
+    lambda_L1: !!float 100
+    lambda_perc: !!float 2
+
+# validation settings
+val:
+  val_freq: 1 #!!float 5e4 # 2e4
+  save_img: false
+  grids: ~
+  crop_size: ~
+  max_minibatch: 8
+
+  metrics:
+    psnr:
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: false
+
+    ssim:
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: false
+
+# logging settings
+logger:
+  print_freq: 10
+  save_checkpoint_freq: !!float 2e4
+  use_tb_logger: true
+  wandb:
+    project:
+    resume_id:  #b
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
+

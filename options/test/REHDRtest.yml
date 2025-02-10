@@ -1,0 +1,61 @@
+# general settings
+name: REHDR11last                                                                                                               #change
+model_type: TestImageEventRestorationModel
+scale: 1
+num_gpu: 1 # set num_gpu: 0 for cpu mode
+manual_seed: 10
+
+# dataset and data loader settings
+datasets:
+  test:
+    name: RealHDR-bestmodel-test
+    type: SeqImgDataset
+
+    dataroot: /home/ice/REHDR3090/dataset/RealH/val #E:\RealHDR\val  # for debug                                         #change
+
+    # add
+    norm_voxel: true
+    return_voxel: true
+
+    max_dataset_size: !!float inf
+    crop_size: ~
+    use_flip: false
+    use_rot: false
+    io_backend:
+      type: disk
+
+    time_step: 1
+
+dataset_name: RealHDR
+
+# network structures
+network_g:
+  type: REHDR
+  img_chn: 3
+  ev_chn: 5
+  num_encoders: 3
+  num_residual_blocks: 2 # num_block of resblock in the bottleneck of unet
+  base_num_channels: 32
+  norm: ~
+  recurrent_block_type: convlstm
+  use_upsample_conv: False
+
+
+# path
+path:
+  pretrain_network_g: /home/ice/REHDR3090/experiments/REHDR11/models/net_g_latest.pth #E:\net_g_latest.pth #                           #change
+  strict_load_g: false
+  resume_state: ~
+  root: ./result  # set this option ONLY in TEST!!!                                                                          #change
+
+# validation settings
+val:
+  save_img: true
+  grids: ~
+  crop_size: ~
+  rgb2bgr: true
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
