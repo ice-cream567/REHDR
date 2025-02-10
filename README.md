@@ -31,11 +31,11 @@ download our RealHDR dataset at [BaiduYunPan](https://pan.baidu.com/s/1wt3vERs0o
 ---
 * train
 
-  * ```python -m torch.distributed.launch --nproc_per_node=4 --master_port=4321 basicsr/train.py -opt options/train/GoPro/EFNet.yml --launcher pytorch```
+  * ```python basicsr/train.py -opt options/train/my/REHDR.yml```
 
 * eval
-  * Download [pretrained model](https://pan.baidu.com/s/1PMfcEg6SkV5_ssq8ne13Og?pwd=mvhu) to ./experiments/pretrained_models/EDMF-GoPro.pth
-  * ```python basicsr/test.py -opt options/test/GoPro/EDMF.yml  ```
+  
+  * ```python basicsr/test.py -opt options/test/my/REHDRtest.yml```
 
 
 
